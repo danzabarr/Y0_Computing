@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Dan\\source\\repos\\Week1\\Week1\\Week1.vbproj",
+      "projectUniqueName": "C:\\Users\\Dan\\Documents\\GitHub\\Y0_Computing\\Week1\\Week1\\Week1.vbproj",
       "projectName": "Week1",
-      "projectPath": "C:\\Users\\Dan\\source\\repos\\Week1\\Week1\\Week1.vbproj",
+      "projectPath": "C:\\Users\\Dan\\Documents\\GitHub\\Y0_Computing\\Week1\\Week1\\Week1.vbproj",
       "packagesPath": "C:\\Users\\Dan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Dan\\source\\repos\\Week1\\Week1\\obj\\",
+      "outputPath": "C:\\Users\\Dan\\Documents\\GitHub\\Y0_Computing\\Week1\\Week1\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Dan\\AppData\\Roaming\\NuGet\\NuGet.Config",

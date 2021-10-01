@@ -1,3 +1,6 @@
+''' <summary>
+''' See also Prompter.vb
+''' </summary>
 Module Program
     Sub Main(args As String())
         'SimpleAdder()
