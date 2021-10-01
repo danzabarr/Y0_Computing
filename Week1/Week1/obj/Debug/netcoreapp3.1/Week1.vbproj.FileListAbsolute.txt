@@ -1,0 +1,14 @@
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.exe
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.deps.json
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.runtimeconfig.json
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.runtimeconfig.dev.json
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.dll
+C:\Users\Dan\source\repos\Week1\Week1\bin\Debug\netcoreapp3.1\Week1.pdb
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.vbproj.AssemblyReference.cache
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.AssemblyInfoInputs.cache
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.AssemblyInfo.vb
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.vbproj.CoreCompileInputs.cache
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.dll
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.pdb
+C:\Users\Dan\source\repos\Week1\Week1\obj\Debug\netcoreapp3.1\Week1.genruntimeconfig.cache
