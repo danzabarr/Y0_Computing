@@ -1,56 +1,20 @@
-Imports System
+Imports System.Threading
 Imports System.Net.Sockets
 Imports System.Text.RegularExpressions
+Imports ChatCommon
 
-Module Server
-
-    Public Const Port As Integer = 8888
+Partial Module Chat
 
     Private clients As New Hashtable()
-
-    Public Function GetString(bytes As Byte()) As String
-
-        If bytes Is Nothing Then
-            Return ""
-        End If
-
-        Dim length = Array.IndexOf(Of Byte)(bytes, 0)
-
-        Console.WriteLine("length of bytes: {0}", bytes.Length)
-        Console.WriteLine("index of 0: {0}", length)
-
-        If length = -1 Then
-            length = bytes.Length
-        End If
-
-        Return Text.Encoding.ASCII.GetString(bytes).Substring(0, length)
-
-    End Function
+    Private acceptConnectionsThread As Thread = New Thread(AddressOf AcceptConnections)
 
     Sub Main()
 
-        Dim thread As New Threading.Thread(AddressOf AcceptConnections)
-        thread.Start()
+        acceptConnectionsThread.Start()
 
         While True
-            Dim input As String = Console.ReadLine()
 
-            If Not input.StartsWith("/") Then
-                input = "/i " + input
-            End If
-
-            Dim args As String() = input.Substring(1).Split(" ")
-
-            Select Case args(0)
-                Case "i"
-
-                Case "s"
-                    Broadcast(input)
-
-                Case "i"
-
-
-            End Select
+            HandleCommands(Nothing, Console.ReadLine(), True)
 
         End While
 
@@ -72,12 +36,10 @@ Module Server
                 networkStream.Read(bytes, 0, 30)
                 Dim username As String = GetString(bytes)
 
-                Console.WriteLine("Login request: '" + username + "'")
 
                 If Not ValidUsername(username) Then
 
-                    Console.WriteLine("Username is invalid")
-
+                    Console.WriteLine("Login request: '" + username + "' failed: Invalid username.")
                     Send(clientSocket, "/e Username is invalid")
                     Continue While
 
@@ -85,13 +47,13 @@ Module Server
 
                 If clients.ContainsKey(username) Then
 
-                    Console.WriteLine("Username exists")
-
+                    Console.WriteLine("Login request: '" + username + "' failed: Username exists.")
                     Send(clientSocket, "/e Username is already taken")
                     Continue While
 
                 End If
 
+                Console.WriteLine("Login request: '" + username + "' successful.")
                 Send(clientSocket, "/u " + username)
 
                 clients(username) = New Client(clientSocket, username)
@@ -109,24 +71,21 @@ Module Server
 
         End Try
         serverSocket.Stop()
-        Console.WriteLine("Exit")
+        Console.WriteLine("Server stopped")
 
     End Sub
 
     Public Function ValidUsername(username As String) As Boolean
 
         If username Is Nothing Then
-            Console.WriteLine("Null")
             Return False
         End If
 
         If username.Length <= 0 Or username.Length > 30 Then
-            Console.WriteLine("Invalid length")
             Return False
         End If
 
         If Not IsAlphaNumeric(username) Then
-            Console.WriteLine("Non-Alphanumeric")
             Return False
         End If
 
@@ -140,7 +99,6 @@ Module Server
         Return Not pattern.IsMatch(strToCheck)
 
     End Function
-
 
     Public Sub Broadcast(message As String)
 
@@ -168,6 +126,25 @@ Module Server
 
     End Sub
 
+    Public Sub Whisper(sender As Client, recipient As String, message As String)
+
+        If sender Is Nothing Then
+            Return
+        End If
+
+        If Not clients.ContainsKey(recipient) Then
+
+            sender.Send("/e user '{0}' could not be found.", recipient)
+            Return
+
+        End If
+
+        Dim recipientClient As Client = clients(recipient)
+
+        recipientClient.Send("/w {0} {1}", sender.username, message)
+
+    End Sub
+
     Public Sub Send(socket As TcpClient, message As String)
 
         Console.WriteLine(message)
@@ -180,66 +157,80 @@ Module Server
 
     End Sub
 
-    Private Sub ParseData(sender As Client, bytes As Byte())
+    Private Function Disconnect(client As Client, ByRef errorMsg As String) As Boolean
 
-        Dim data As String = GetString(bytes)
+        If client Is Nothing Then
+            errorMsg = "Client argument is null."
+            Return False
+        End If
 
-        Broadcast(sender, data)
+        If Not client.socket.Connected Then
+            errorMsg = "Client is not connected."
+            Return False
+        End If
+
+        client.socket.Client.Disconnect(False)
+
+        Return True
+
+    End Function
+
+    Private Function Kick(username As String, ByRef errorMsg As String) As Boolean
+
+        If username Is Nothing Then
+            errorMsg = "Username is null."
+            Return False
+        End If
+
+        If Not clients.ContainsKey(username) Then
+            errorMsg = "A user with the name " + username + " does not exist."
+            Return False
+        End If
+
+        Dim client As Client = clients(username)
+
+        client.Send("/kick")
+        client.socket.Client.Disconnect(False)
+
+        Return True
+
+    End Function
+
+    Private Sub HandleCommands(sender As Client, input As String, asServer As Boolean)
+
+        Dim command As String = ParseCommand(input)
+        Dim errorMsg As String = ""
+
+        Select Case command
+
+            Case "dc disconnect"
+
+                If Not Disconnect(sender, errorMsg) Then
+                    Console.WriteLine(errorMsg)
+                End If
+
+            Case "kick"
+
+                Dim username As String = ParseCommandArgs(input)
+
+                If Not Kick(username, errorMsg) Then
+                    Console.WriteLine(errorMsg)
+                End If
+
+            Case "s", "say"
+
+                Dim message As String = ParseCommandArgs(input)
+
+                Broadcast(sender, message)
+
+            Case "w", "whisper"
+
+                Dim args As String() = ParseCommandArgs(input, 1, True)
+
+                Whisper(sender, args(0), args(1))
+
+        End Select
 
     End Sub
-
-    Public Class Client
-
-        Public socket As TcpClient
-        Public username As String
-
-        Public Sub New(socket As TcpClient, username As String)
-
-            Me.socket = socket
-            Me.username = username
-
-            Dim thread As New Threading.Thread(AddressOf Run)
-            thread.Start()
-
-        End Sub
-
-        Private Sub Run()
-            Console.WriteLine("Created thread for " + username)
-            Dim networkStream As NetworkStream
-            Dim bytes(65536) As Byte
-            While socket.Client.Connected
-                Try
-
-                    networkStream = socket.GetStream()
-                    networkStream.Read(bytes, 0, socket.ReceiveBufferSize)
-
-                    ParseData(Me, bytes)
-
-                    networkStream.Flush()
-                Catch ex As Exception
-
-                End Try
-
-            End While
-
-            clients.Remove(username)
-            socket.Close()
-            networkStream.Flush()
-            networkStream.Close()
-
-            Broadcast(username + " disconnected")
-
-        End Sub
-
-        Public Sub Send(message As String)
-
-            Dim bytes() As Byte = Text.Encoding.ASCII.GetBytes(message)
-            Dim networkStream As NetworkStream = socket.GetStream()
-            networkStream.Write(bytes, 0, bytes.Length)
-            networkStream.Flush()
-
-        End Sub
-
-    End Class
 
 End Module
