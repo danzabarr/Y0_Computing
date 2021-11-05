@@ -7,7 +7,7 @@ Module Program
         'DivisibleProblem()
         'CashMachineProblem()
         'DiceGameProblem()
-        MonthProblem()
+        'MonthProblem()
 
     End Sub
 
