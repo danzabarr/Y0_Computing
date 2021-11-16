@@ -1,9 +1,10 @@
 ﻿Module Queue
 
     Dim queue(9) As String
+    Dim empty As Integer = True
     Dim head, tail As Integer
 
-    Sub Main()
+    Sub Main3()
 
         While True
 
@@ -49,14 +50,25 @@
 
     End Sub
 
-    Function Clear()
+    Sub Clear()
 
         head = 0
         tail = 0
+        empty = True
 
-    End Function
+    End Sub
 
-    Function Size()
+    Function Size() As Integer
+
+        If tail = head Then
+
+            If empty Then
+                Return 0
+            Else
+                Return queue.Length
+            End If
+
+        End If
 
         If tail > head Then
             Return tail - head
@@ -66,15 +78,15 @@
 
     End Function
 
-    Function IsFull()
+    Function IsFull() As Boolean
 
-        Return (tail + 1) Mod queue.Length = head
+        Return Not empty And head = tail
 
     End Function
 
-    Function IsEmpty()
+    Function IsEmpty() As Boolean
 
-        Return head = tail
+        Return empty
 
     End Function
 
@@ -86,6 +98,7 @@
 
         queue(tail) = item
         tail = (tail + 1) Mod queue.Length
+        empty = False
 
         Return True
 
@@ -100,6 +113,9 @@
 
         Dim item As String = queue(head)
         head = (head + 1) Mod queue.Length
+        If head = tail Then
+            empty = True
+        End If
 
         Return item
 
@@ -109,12 +125,12 @@
 
         Dim i As Integer = head
 
-        While i <> tail
+        Do
 
             Console.WriteLine(queue(i))
             i = (i + 1) Mod queue.Length
 
-        End While
+        Loop Until i = tail
 
     End Sub
 
